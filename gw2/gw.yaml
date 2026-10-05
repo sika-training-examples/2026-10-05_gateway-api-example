@@ -1,0 +1,48 @@
+# Shared Gateway - the Gateway API equivalent of an ingress-nginx controller.
+# Nothing here is app specific. Apps bring their own HTTPS listener + cert
+# via a ListenerSet in their namespace, and their own HTTPRoute.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gw2
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: gw2
+  namespace: gw2
+spec:
+  gatewayClassName: eg
+  # Allow ListenerSets from any namespace to add listeners to this Gateway.
+  # To restrict, use `from: Selector` with a namespace label selector.
+  allowedListeners:
+    namespaces:
+      from: All
+  listeners:
+    # Plain HTTP for all hosts - used for ACME HTTP-01 challenges
+    # and for the HTTP -> HTTPS redirect.
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: All
+---
+# Redirect all HTTP traffic to HTTPS (like ingress-nginx ssl-redirect).
+# ACME challenge routes created by cert-manager have a hostname and an exact
+# path, so they are more specific and take precedence over this route.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: https-redirect
+  namespace: gw2
+spec:
+  parentRefs:
+    - name: gw2
+      sectionName: http
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301

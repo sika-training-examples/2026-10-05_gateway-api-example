@@ -24,7 +24,7 @@ helm upgrade --install eg oci://docker.io/envoyproxy/gateway-helm \
 
 # cert-manager with Gateway API + ListenerSet support
 helm upgrade --install cert-manager oci://quay.io/jetstack/charts/cert-manager \
-  --version $CERT_MANAGER_VERSION \
+  --version v1.21.2 \
   --namespace cert-manager --create-namespace \
-  --values "$(dirname "$0")/cert-manager-values.yaml" \
+  --values "./cert-manager-values.yaml" \
   --wait
