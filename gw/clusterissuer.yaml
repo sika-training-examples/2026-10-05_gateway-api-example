@@ -1,0 +1,20 @@
+# Let's Encrypt issuer solving HTTP-01 challenges through the shared Gateway.
+# cert-manager creates a temporary HTTPRoute for /.well-known/acme-challenge/
+# attached to the `http` listener of gw/gw.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-gw
+spec:
+  acme:
+    email: ondrej@sikalabs.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      name: letsencrypt-gw-account-key
+    solvers:
+      - http01:
+          gatewayHTTPRoute:
+            parentRefs:
+              - name: gw
+                namespace: gw
+                sectionName: http
