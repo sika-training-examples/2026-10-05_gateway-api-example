@@ -12,7 +12,7 @@ metadata:
   name: gw
   namespace: gw
 spec:
-  gatewayClassName: cilium
+  gatewayClassName: eg
   # Allow ListenerSets from any namespace to add listeners to this Gateway.
   # To restrict, use `from: Selector` with a namespace label selector.
   allowedListeners:
